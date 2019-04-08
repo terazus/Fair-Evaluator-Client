@@ -107,4 +107,3 @@ class Evaluator:
 if __name__ == '__main__':
     collections = Collections()
     collections.get_collection(4).get_metrics()
-    print(collections.get_collection(4))

@@ -36,10 +36,13 @@ class Collection:
                     value = data[attribute]
                     if type(value) is str:
                         value = value.replace("\n", " ").replace("\r", " ").replace('"', "'")
-                    exec('print(value)', {'value': value})
-                    exec('self.%s = "%s"'
-                         % (mapping[attribute], value)
-                         )
+                        exec('self.%s = "%s"'
+                             % (mapping[attribute], value)
+                             )
+                    else:
+                        exec('self.%s = %s'
+                             % (mapping[attribute], value)
+                             )
 
         else:
             print('Attempt to create new collection')
@@ -61,7 +64,9 @@ class Collection:
                     value = collection[attribute]
                     if type(value) is str:
                         value = value.replace("\n", " ").replace("\r", " ").replace('"', "'")
-                    exec('self.%s = "%s"' % (mapping[attribute], value))
+                        exec('self.%s = "%s"' % (mapping[attribute], value))
+                    else:
+                        exec('self.%s = %s' % (mapping[attribute], value))
         else:
             return not_found
 
@@ -77,4 +82,18 @@ class Collection:
 class Metric:
 
     def __init__(self, **kwargs):
-        pass
+        if 'identifier' in kwargs.keys():
+            self.metric_id = kwargs['identifier'].split('/')[-1]
+            data = self.refresh_metric()
+
+            if 'message' not in data.keys():
+                for field in data:
+                    print(field)
+
+    def refresh_metric(self):
+        url = baseURL + "/metrics/" + self.metric_id + ".json"
+        request = requests.get(url, headers=headers, verify=False)
+        if request.status_code is not "404" and request.status_code is not 404:
+            return json.loads(request.text)
+        else:
+            return not_found
